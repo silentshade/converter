@@ -1,0 +1,96 @@
+:allowedPortals: [:ror.mdtube.ru, :mdtube.ru]
+:requiredFields: [:file, :domain, :action, :respond_to]
+:maxRetries: 10
+:uploadPath: "/srv/www/converter/upload/test/"
+:selfHttp: "http://dl1.mdtube.ru/"
+:origVideo: "/storage/video/orig/"
+:outBasePath: "/storage/"
+:apiPath: "/api/uploads/"
+:scrNum: 5
+:maxRetries: 10
+:conf: 
+  :1.778: 
+    :430x240:
+      :x264p: "baseline"
+      :x264encopts: "subq=2:frameref=1:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 430
+      :h: 240
+      :vbitrate: 204000
+      :srate: 22050
+      :abitrate: 96
+      :httpPath: "v/a/"
+    :640x360:
+      :x264p: "baseline"
+      :x264encopts: "subq=2:frameref=2:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 640
+      :h: 360
+      :vbitrate: 388000
+      :srate: 22050
+      :abitrate: 112
+      :httpPath: "v/b/"
+    :850x480:
+      :x264p: "baseline"
+      :x264encopts: "subq=4:frameref=4:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 850
+      :h: 480
+      :vbitrate: 572000
+      :srate: 22050
+      :abitrate: 128
+      :httpPath: "v/c/"
+    :1280x720:
+      :x264p: "main"
+      :x264encopts: "subq=5:frameref=6:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 1280
+      :h: 720
+      :vbitrate: 1256000
+      :srate: 44100
+      :abitrate: 256
+      :httpPath: "v/d/"
+    :1920x1080:
+      :x264p: "high"
+      :x264encopts: "subq=6:frameref=12:cabac:me=umh:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 1920
+      :h: 1080
+      :vbitrate: 3256000
+      :srate: 44100
+      :abitrate: 256
+      :httpPath: "v/e/"
+
+  :1.333:
+    :320x240:
+      :x264p: "baseline"
+      :x264encopts: "subq=2:frameref=1:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 320
+      :h: 240
+      :vbitrate: 204000
+      :srate: 22050
+      :abitrate: 96
+      :httpPath: "v/a/"
+    :480x360:
+      :x264p: "baseline"
+      :x264encopts: "subq=2:frameref=2:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 480
+      :h: 360
+      :vbitrate: 288000
+      :srate: 22050
+      :abitrate: 112
+      :httpPath: "v/b/"
+    :640x480:
+      :x264p: "baseline"
+      :x264encopts: "subq=4:frameref=4:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 640
+      :h: 480
+      :vbitrate: 372000
+      :srate: 44100
+      :abitrate: 128
+      :httpPath: "v/c/"
+    :960x720:
+      :x264p: "main"
+      :x264encopts: "subq=5:frameref=6:cabac:threads=auto:bframes=3:b_pyramid=normal:weight_b"
+      :w: 960
+      :h: 720
+      :vbitrate: 1256000
+      :srate: 44100
+      :abitrate: 256
+      :httpPath: "v/d/"
+  

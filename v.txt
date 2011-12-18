@@ -1,0 +1,1 @@
+Video;%BitRate%|%FrameRate%|%FrameRate_Minimum%|%FrameRate_Maximum%|%FrameRate_Mode%|%FrameCount%|%ScanType/String%|%Format%|%Format_Profile%|%Width%|%Height%|%DisplayAspectRatio%|%PixelAspectRatio%|%Standard%

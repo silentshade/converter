@@ -1,0 +1,1 @@
+General;%Duration%|%Duration/String3%|%Format%|%Format_Profile%
