@@ -1,13 +1,29 @@
-:allowedPortals: [:ror.mdtube.ru, :mdtube.ru]
-:requiredFields: [:file, :domain, :action, :respond_to]
-:maxRetries: 10
-:uploadPath: "/srv/www/converter/upload/test/"
-:selfHttp: "http://dl1.mdtube.ru/"
-:origVideo: "/storage/video/orig/"
-:outBasePath: "/storage/"
-:apiPath: "/api/uploads/"
-:scrNum: 5
-:maxRetries: 10
+:development:
+  :allowedPortals: [:localhost, :"0.0.0.0"]
+  :requiredFields: [:file, :domain, :action, :respond_to]
+  :maxRetries: 10
+  :uploadPath: "/Users/silentshade/repos/mdtube/uploads/"
+  :selfHttp: "http://0.0.0.0:3000/"
+  :origVideo: "/Users/silentshade/repos/storage/video/orig/"
+  :outBasePath: "/Users/silentshade/repos/storage/"
+  :apiPath: "/api/uploads/"
+  :queueName: "converter"
+  :tmpPath: "/tmp"
+  :scrNum: 5
+  :maxRetries: 10
+:production:
+  :allowedPortals: [:mdtube.ru]
+  :requiredFields: [:file, :domain, :action, :respond_to]
+  :maxRetries: 10
+  :uploadPath: "/srv/www/converter/upload/test/"
+  :selfHttp: "http://dl1.mdtube.ru/"
+  :origVideo: "/storage/video/orig/"
+  :outBasePath: "/storage/"
+  :apiPath: "/api/uploads/"
+  :queueName: "converter"
+  :tmpPath: "/storage/tmp"
+  :scrNum: 5
+  :maxRetries: 10
 :conf: 
   :1.778: 
     :430x240:

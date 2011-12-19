@@ -60,7 +60,7 @@ module Stages
 =end
           o[:res][key] = v.merge({
               :targetRes => "#{v[:w]}:#{v[:h]}",
-              :bitrate => v[:vbitrate].to_i < info[:video][:bitrate].to_i ? "#{v[:vbitrate].to_i/1000)}" : "#{(info[:video][:bitrate].to_i/1000)}",
+              :bitrate => v[:vbitrate].to_i < info[:video][:bitrate].to_i ? "#{v[:vbitrate].to_i/1000}" : "#{info[:video][:bitrate].to_i/1000}",
 	      :addopts =>  info[:video][:frmode] == "VFR" ? "-noskip" : "",
 	      :fps => info[:video][:fps],
               :targetAudioSrate => info[:audio][:srate].to_i > v[:srate] ? v[:srate].to_s : info[:audio][:srate].to_s,
@@ -74,7 +74,7 @@ module Stages
       end
 
       o[:fname] = m['file'].split('.')[0]
-      o[:tpath] = "/storage/tmp/#{o[:fname]}/"
+      o[:tpath] = "#{$options[:tmpPath]}/#{o[:fname]}/"
       o[:info] = info
 
       %x[/bin/mkdir #{o[:tpath]}]

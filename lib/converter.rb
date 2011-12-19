@@ -3,7 +3,7 @@ module Converter
       movieInfo = {:general => {},:video => {}, :audio => {}}
       movieInfo[:general][:dur],
       movieInfo[:general][:durs],
-      movieInfo[:general][:container] = (%x[ /usr/bin/mediainfo --Inform="file://g.txt" #{file} ]).strip.split('|')
+      movieInfo[:general][:container] = (%x[ mediainfo --Inform="file://g.txt" #{file} ]).strip.split('|')
 
       movieInfo[:video][:bitrate],
       movieInfo[:video][:fps],
@@ -18,12 +18,12 @@ module Converter
       movieInfo[:video][:height],
       movieInfo[:video][:dar],
       movieInfo[:video][:par],
-      movieInfo[:video][:standard] = (%x[ /usr/bin/mediainfo --Inform="file://v.txt" #{file} ]).strip.split('|')
+      movieInfo[:video][:standard] = (%x[ mediainfo --Inform="file://v.txt" #{file} ]).strip.split('|')
 
       movieInfo[:audio][:bitrate],
       movieInfo[:audio][:srate],
       movieInfo[:audio][:format],
-      movieInfo[:audio][:formatp] = (%x[ /usr/bin/mediainfo --Inform="file://a.txt" #{file} ]).strip.split('|')
+      movieInfo[:audio][:formatp] = (%x[ mediainfo --Inform="file://a.txt" #{file} ]).strip.split('|')
       return movieInfo
     end
 
@@ -32,11 +32,12 @@ module Converter
       #sleep(2)
       begin
         %x[#{c}]
-        raise MediaFormatException if $?.exitstatus != 0
+        raise if $?.exitstatus != 0
         return true
-      rescue => msg
-        print msg.inspect + "\n"
-        print msg.backtrace.join("\n")
+      rescue Exception => e
+        print e.message + "\n"
+        print e.inspect + "\n"
+        print e.backtrace.join("\n")
         return false
       end
     end
@@ -46,21 +47,21 @@ module Converter
         resDir = o[:tpath]+k.to_s+'/'
         outfile = $options[:outBasePath]+'video/'+k.to_s+'/'+o[:fname]+'.mp4'
         result = []
-        %x[/bin/mkdir #{resDir}]
+        %x[mkdir #{resDir}]
         cmds = [
-          '/usr/bin/mencoder -af volnorm=2 -oac faac -faacopts br='+v[:targetAudioBitrate]+ \
+          'mencoder -af volnorm=2 -oac faac -faacopts br='+v[:targetAudioBitrate]+ \
           ':mpeg=4:object=2 -channels 2 -srate '+v[:srate].to_s+' -ovc x264 -x264encopts bitrate='+v[:bitrate]+':'+v[:x264encopts]+ \
           ' -ofps '+v[:fps]+' '+v[:addopts]+' -vf pp=hb/vb/lb,dsize='+v[:targetRes]+':0,scale=-8:-8,harddup '+$options[:filepath]+' -o '+resDir+'tmp.avi',
 
           #'mencoder -of rawvideo -nosound -ovc x264 -x264encopts bitrate='+v[:bitrate]+':'+v[:x264encopts]+ \
           #' -ofps '+v[:fps]+' -vf pp=hb/vb/lb,dsize='+v[:targetRes]+':0,scale=-8:-8,harddup '+$options[:filepath]+' -o '+resDir+'tmp.h264',
           
-          '/usr/bin/mencoder '+resDir+'tmp.avi -ovc copy -oac copy -of rawvideo -o '+resDir+'tmp.h264 -nosound 2>&1',
-          '/usr/bin/mencoder '+resDir+'tmp.avi -ovc copy -oac copy -of rawaudio -o '+resDir+'tmp.aac 2>&1',
+          'mencoder '+resDir+'tmp.avi -ovc copy -oac copy -of rawvideo -o '+resDir+'tmp.h264 -nosound 2>&1',
+          'mencoder '+resDir+'tmp.avi -ovc copy -oac copy -of rawaudio -o '+resDir+'tmp.aac 2>&1',
           #'mplayer '+$options[:filepath]+' -vc dummy -ao pcm:fast:file='+resDir+'tmp.wav',
           #'neroAacEnc -cbr '+(v[:targetAudioBitrate].to_i*1000).to_s+' -if '+resDir+'tmp.wav -of '+resDir+'tmp.m4a',
-          '/usr/bin/MP4Box -add '+resDir+'tmp.h264 -fps '+o[:info][:video][:fps]+' -add '+resDir+'tmp.aac '+resDir+'tmp.mp4 2>&1',
-          '/bin/mv '+resDir+'tmp.mp4 '+outfile+' 2>&1'
+          'MP4Box -add '+resDir+'tmp.h264 -fps '+o[:info][:video][:fps]+' -add '+resDir+'tmp.aac '+resDir+'tmp.mp4 2>&1',
+          'mv '+resDir+'tmp.mp4 '+outfile+' 2>&1'
         ]
         cmds.each do |cmd| 
           #p cmd 
@@ -98,7 +99,7 @@ module Converter
           p postdata
           #if (!$options['local'])
             #uri = URI.parse('http://'+m['domain']+m['respond_to'])
-            uri = URI.parse('http://mdtube.ru/api/uploads')
+            uri = m['domain'].blank? ? URI.parse('http://mdtube.ru/api/uploads') : URI.parse('http://'+m['domain']+m['respond_to'])
             http = Net::HTTP.new uri.host, uri.port
             request = Net::HTTP::Post.new uri.request_uri
             request.set_form_data(:success => 'true', :data => postdata)
@@ -113,7 +114,7 @@ module Converter
           #p response.body
         else
           Log.add("File #o[:fname] convertion failed. Moving to failed")
-          %x[/bin/mv #{$options[:filepath]} #{$options[:filepath]}.failed]
+          %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
         end
       end
       o
@@ -132,17 +133,17 @@ module Converter
         #position = seconds-5 if position >= seconds-5
         scale = o[:info][:video][:basicDar] == '1.333'? '93:70' : '125:70'
 
-        cmds << '/usr/bin/mplayer -vf scale='+scale+',crop=92:70 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
-        cmds << '/bin/mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/small/'+o[:fname]+'_'+pass.to_s+'.jpg'
+        cmds << 'mplayer -vf scale='+scale+',crop=92:70 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
+        cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/small/'+o[:fname]+'_'+pass.to_s+'.jpg'
 
         scale = o[:info][:video][:basicDar] == '1.333'? '198:149' : '264:149'
 
-        cmds << '/usr/bin/mplayer -vf scale='+scale+',crop=200:149 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
-        cmds << '/bin/mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/large/'+o[:fname]+'_'+pass.to_s+'.jpg'
+        cmds << 'mplayer -vf scale='+scale+',crop=200:149 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
+        cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/large/'+o[:fname]+'_'+pass.to_s+'.jpg'
         
 
-        cmds << '/usr/bin/mplayer -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:outBasePath]+'video/'+highestRes.to_s+'/'+o[:fname]+'.mp4'
-        cmds << '/bin/mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/orig/'+o[:fname]+'_'+pass.to_s+'.jpg'
+        cmds << 'mplayer -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:outBasePath]+'video/'+highestRes.to_s+'/'+o[:fname]+'.mp4'
+        cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/orig/'+o[:fname]+'_'+pass.to_s+'.jpg'
 
         position += step
       end
