@@ -18,6 +18,7 @@ require './lib/helpers'
 require './lib/converter'
 require './lib/stages'
 
+Log.add("Running in #{$options[:mode]}")
 if !ARGV.empty?
     $args = {}
     ARGV.each_with_index do |v,i| 
