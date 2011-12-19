@@ -18,8 +18,8 @@ require './lib/helpers'
 require './lib/converter'
 require './lib/stages'
 
-p %x[hostname].chomp
-Log.add("Running in #{$options[:mode]}")
+Log.add("Running in #{$options[:mode]} mode")
+
 if !ARGV.empty?
     $args = {}
     ARGV.each_with_index do |v,i| 
