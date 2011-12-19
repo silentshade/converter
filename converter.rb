@@ -2,7 +2,7 @@ HM = '/srv/www/converter/htdocs/converter'
 require 'yaml'
 require './lib/core_ext'
 o = YAML.load_file('./config/config.yml')
-if %x[hostname] == "dl1.mdtube.ru" 
+if %x[hostname].chomp == "dl1.mdtube.ru" 
   $options = o[:production]
   $options[:mode] = :production
 else
@@ -18,7 +18,7 @@ require './lib/helpers'
 require './lib/converter'
 require './lib/stages'
 
-Log.add("Running in #{$options[:mode]}")
+Log.add("Running in #{$options[:mode]} mode")
 if !ARGV.empty?
     $args = {}
     ARGV.each_with_index do |v,i| 
