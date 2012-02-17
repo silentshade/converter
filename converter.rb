@@ -86,8 +86,8 @@ movies.each do |movieString|
     if $options['local']
       p movie
       #p File.basename(File.basename(movieHash["file"],'.failed'),'.*')
-      uri = movie['domain'].blank? ? ($options[:mode] == :development ? URI.parse('http://0.0.0.0:3000') : URI.parse('http://mdtube.ru')) : "http://#{movie['domain']}"
-      req = Net::HTTP::Get.new('/api/videos/exists?f='+File.basename(movie["file"],'.*'))
+      uri = movie['domain'].blank? ? ($options[:mode] == :development ? URI.parse('http://api.mdtube.lan:3000') : URI.parse('http://api.mdtube.ru')) : "http://#{movie['domain']}"
+      req = Net::HTTP::Get.new('/videos/exists?f='+File.basename(movie["file"],'.*'))
       http = Net::HTTP.new uri.host, uri.port                                                                                                                                                                                                                                                                  
       response = http.start do |http|
         http.request(req)
