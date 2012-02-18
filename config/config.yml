@@ -6,7 +6,7 @@
   :selfHttp: "http://0.0.0.0:3000/"
   :origVideo: "/Users/silentshade/repos/storage/video/orig/"
   :outBasePath: "/Users/silentshade/repos/storage/"
-  :apiPath: "/api/uploads/"
+  :apiPath: "/uploads/"
   :queueName: "converter"
   :tmpPath: "/tmp"
   :scrNum: 5
@@ -19,7 +19,7 @@
   :selfHttp: "http://dl1.mdtube.ru/"
   :origVideo: "/storage/video/orig/"
   :outBasePath: "/storage/"
-  :apiPath: "/api/uploads/"
+  :apiPath: "/uploads/"
   :queueName: "converter"
   :tmpPath: "/storage/tmp"
   :scrNum: 5
