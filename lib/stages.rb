@@ -13,7 +13,16 @@ module Stages
 # Getting file
 
     def self.stage0(m)
-      $options[:filepath] = m['path'] ? m['path']+m['file'] : $options[:uploadPath]+m['file']
+
+      if m['path']
+        $options[:filepath] = m['path']
+      elsif m['action'].to_i == 2
+        $options[:filepath] = $options[:origVideo]
+      else
+        $options[:filepath] = $options[:uploadPath]
+      end
+      $options[:filepath] += m['file']
+
       if !File.file?($options[:filepath])
         m[:retry]+=1
         retval = self.retval m,'File not found: '+$options[:filepath]
