@@ -106,7 +106,7 @@ movies.each do |movieString|
     end
     movie[:stage] = 0 if !movie[:stage]
     movie[:retry] = 0 if !movie[:retry]
-    p movie
+    p "Stage is: #{movie[:stage]}"
 
     result = case movie[:stage]
       when 0 then Stages.stage0 movie
