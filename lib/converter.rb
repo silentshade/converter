@@ -55,14 +55,14 @@ module Converter
         cmds = [
           'mencoder -af volnorm=2 -oac faac -faacopts br='+v[:targetAudioBitrate]+ \
           ':mpeg=4:object=2 -channels 2 -srate '+v[:srate].to_s+' -ovc x264 -x264encopts bitrate='+v[:bitrate]+':'+v[:x264encopts]+ \
-          ' -ofps '+v[:fps]+' '+v[:addopts]+' -vf pp=hb/vb/lb,dsize='+v[:targetRes]+':0,scale=-8:-8,harddup '+$options[:filepath]+' -o '+resDir+'tmp.avi',
+          ' -ofps '+v[:fps]+' '+v[:addopts]+' -vf pp=hb/vb/lb,dsize='+v[:targetRes]+':0,scale=-8:-8,harddup '+m[:filepath]+' -o '+resDir+'tmp.avi',
 
           #'mencoder -of rawvideo -nosound -ovc x264 -x264encopts bitrate='+v[:bitrate]+':'+v[:x264encopts]+ \
-          #' -ofps '+v[:fps]+' -vf pp=hb/vb/lb,dsize='+v[:targetRes]+':0,scale=-8:-8,harddup '+$options[:filepath]+' -o '+resDir+'tmp.h264',
+          #' -ofps '+v[:fps]+' -vf pp=hb/vb/lb,dsize='+v[:targetRes]+':0,scale=-8:-8,harddup '+m[:filepath]+' -o '+resDir+'tmp.h264',
           
           'mencoder '+resDir+'tmp.avi -ovc copy -oac copy -of rawvideo -o '+resDir+'tmp.h264 -nosound 2>&1',
           'mencoder '+resDir+'tmp.avi -ovc copy -oac copy -of rawaudio -o '+resDir+'tmp.aac 2>&1',
-          #'mplayer '+$options[:filepath]+' -vc dummy -ao pcm:fast:file='+resDir+'tmp.wav',
+          #'mplayer '+m[:filepath]+' -vc dummy -ao pcm:fast:file='+resDir+'tmp.wav',
           #'neroAacEnc -cbr '+(v[:targetAudioBitrate].to_i*1000).to_s+' -if '+resDir+'tmp.wav -of '+resDir+'tmp.m4a',
           'MP4Box -add '+resDir+'tmp.h264 -fps '+o[:info][:video][:fps]+' -add '+resDir+'tmp.aac '+resDir+'tmp.mp4 2>&1',
           'mv '+resDir+'tmp.mp4 '+outfile+' 2>&1'
@@ -107,7 +107,7 @@ module Converter
             response = Response.send request
             #if response.code == "404"
             #  Log.add("File #{o[:fname]} not in database. Moving to 404")
-            #  %x[mv #{$options[:filepath]} #{$options[:filepath]}.404]
+            #  %x[mv #{m[:filepath]} #{m[:filepath]}.404]
             #end
             p response.code
             p response.message
@@ -120,7 +120,7 @@ module Converter
       end
       if !o[:res].map{|k,v| v[:success]}.any?
         #Log.add "Moving #{o[:fname]} to '.failed' as no convertion succeded"
-        #%x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
+        #%x[mv #{m[:filepath]} #{m[:filepath]}.failed]
       end
       return o
     end
@@ -138,16 +138,16 @@ module Converter
         #position = seconds-5 if position >= seconds-5
         scale = o[:info][:video][:basicDar] == '1.333'? '93:70' : '125:70'
 
-        cmds << 'mplayer -vf scale='+scale+',crop=92:70 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
+        cmds << 'mplayer -vf scale='+scale+',crop=92:70 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+m[:filepath]
         cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/small/'+o[:fname]+'_'+pass.to_s+'.jpg'
 
         scale = o[:info][:video][:basicDar] == '1.333'? '198:149' : '264:149'
 
-        cmds << 'mplayer -vf scale='+scale+',crop=200:149 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
+        cmds << 'mplayer -vf scale='+scale+',crop=200:149 -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+m[:filepath]
         cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/large/'+o[:fname]+'_'+pass.to_s+'.jpg'
         
 
-        cmds << 'mplayer -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
+        cmds << 'mplayer -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+m[:filepath]
         cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/orig/'+o[:fname]+'_'+pass.to_s+'.jpg'
 
         position += step

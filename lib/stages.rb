@@ -8,7 +8,7 @@ module Stages
         else
           Log.add "#{msg}. Maximum retry count #{$options[:maxRetries]} exceeded."
           Log.add "Moving #{o[:fname]} to '.failed' as no convertion succeded"
-          %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
+          %x[mv #{m[:filepath]} #{m[:filepath]}.failed]
           Log.add "Sending"
           postdata = {
             :id => m[:id],
@@ -30,30 +30,30 @@ module Stages
     def self.stage0(m)
 
       if m[:path]
-        $options[:filepath] = m[:path]
+        m[:filepath] = m[:path]
       elsif m[:action].to_i == 2
-        $options[:filepath] = $options[:origVideo]
+        m[:filepath] = $options[:origVideo]
       else
-        $options[:filepath] = $options[:uploadPath]
+        m[:filepath] = $options[:uploadPath]
       end
-      $options[:filepath] += m[:file]
+      m[:filepath] += m[:file]
 
-      if !File.file?($options[:filepath])
+      if !File.file?(m[:filepath])
         m[:retry]+=1
-        retval = self.retval m,"File not found: #{$options[:filepath]}"
+        retval = self.retval m,"File not found: #{m[:filepath]}"
         return retval
       end
-      Log.add("Got new file to convert: #{$options[:filepath]}")
+      Log.add("Got new file to convert: #{m[:filepath]}")
       m[:stage]+=1
       self.stage1 m
     end
 
     # Calculating options
     def self.stage1(m) 
-      info = Converter.parse $options[:filepath]
+      info = Converter.parse m[:filepath]
       if !info || info[:general][:dur].to_s.empty? || info[:video][:bitrate].to_s.empty?
         m[:retry]+=1
-        retval = self.retval m,"Could not get movide information: #{$options[:filepath]}"
+        retval = self.retval m,"Could not get movide information: #{m[:filepath]}"
         return retval
       end
       o = {:res => {}}
@@ -142,7 +142,7 @@ module Stages
 
   # Response    
     def self.stage4(m)
-      cmd = 'mv '+$options[:filepath]+' '+$options[:outBasePath]+'video/orig/'+m[:file]+' 2>&1'
+      cmd = 'mv '+m[:filepath]+' '+$options[:outBasePath]+'video/orig/'+m[:file]+' 2>&1'
       Log.add "Dummy move here.."
       #Converter.execute(cmd)
     end
