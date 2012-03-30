@@ -114,7 +114,7 @@ movies.each do |movieString|
       when 3 then Stages.stage3 movie
       when 4 then Stages.stage3 movie
     end
-    if !result.nil?
+    if !result.nil? && !$options[:local]
       mem.enqueue q, result
     end
     #p result
