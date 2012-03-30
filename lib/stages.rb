@@ -1,7 +1,7 @@
 module Stages
     def self.retval(m,msg = 'Unknown error')
       Log.add "Stage #{m[:stage]} result:"
-      if !$options[:local]
+      if !$options['local']
         if m[:retry] <= $options[:maxRetries]
           Log.add "#{msg}. Sending back to queue, retry count: #{m[:retry]}."
           return m
