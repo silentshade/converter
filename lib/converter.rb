@@ -28,18 +28,21 @@ module Converter
     end
 
     def self.execute(c)
-      p c
-      #sleep(2)
+      Log.add "Executing command: #{c}"
       begin
         %x[#{c}]
-        raise if $?.exitstatus != 0
+        raise MediaFormatException if $?.exitstatus != 0
         return true
-      rescue Exception => e
-        print e.message + "\n"
-        print e.inspect + "\n"
-        print e.backtrace.join("\n")
+      rescue MediaFormatException
+        Log.add "Command unsuccessfull: #{c}, with exitstatus #{$?.exitstatus}"
         return false
       end
+    end
+
+    begin
+      %x[mv asdadasd ..]
+      raise MediaFormatException if $?.exitstatus != 0
+    rescue MediaFormatException => e
     end
     
     def self.convert!(m,o)
@@ -67,8 +70,7 @@ module Converter
           #p cmd 
           result.push self.execute(cmd)
         end
-        p result
-        #break
+        Log.recursive_add result
         if result.all?
           info = Converter.parse outfile
           o[:res][k][:success] = true
@@ -113,9 +115,13 @@ module Converter
           #end
           #p response.body
         else
-          Log.add("File #o[:fname] convertion failed. Moving to failed")
-          %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
+          Log.add("File #{o[:fname]} convertion to #{k} failed.")
+          o[:res][k][:success] = false
         end
+      end
+      if !o[:res].map{|k,v| v[:success]}.any?
+        Log.add "Moving #{o[:fname]} to '.failed' as no convertion succeded"
+        %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
       end
       o
     end
@@ -142,7 +148,7 @@ module Converter
         cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/large/'+o[:fname]+'_'+pass.to_s+'.jpg'
         
 
-        cmds << 'mplayer -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:outBasePath]+'video/'+highestRes.to_s+'/'+o[:fname]+'.mp4'
+        cmds << 'mplayer -frames 1 -vo jpeg:quality=70:outdir='+o[:tpath]+'scr/ -nosound -ss '+position.to_s+' '+$options[:filepath]
         cmds << 'mv '+o[:tpath]+'scr/00000001.jpg '+$options[:outBasePath]+'scr/orig/'+o[:fname]+'_'+pass.to_s+'.jpg'
 
         position += step
@@ -150,7 +156,7 @@ module Converter
       cmds.each do |cmd|
         result.push self.execute(cmd)
       end
-      p "Result: #{result}"
+      Log.add "Result: #{result}"
       return m
     end
 end

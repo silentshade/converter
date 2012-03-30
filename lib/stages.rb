@@ -2,16 +2,15 @@ module Stages
     def self.retval(m,msg = 'Unknown error')
       Log.add(m[:stage])
       if m[:retry] <= $options[:maxRetries]
-        Log.add(msg+'. Sending back to queue, retry count: '+m[:retry].to_s)
+        Log.add("#{msg}. Sending back to queue, retry count: #{m[:retry]}.")
         return m
       else
-        Log.add(msg+'. Maximum retry count '+$options[:maxRetries]+' exceeded.')
+        Log.add("#{msg}. Maximum retry count #{$options[:maxRetries]} exceeded.")
         return nil
       end
     end
     
-# Getting file
-
+    # Getting file
     def self.stage0(m)
 
       if m['path']
@@ -25,12 +24,12 @@ module Stages
 
       if !File.file?($options[:filepath])
         m[:retry]+=1
-        retval = self.retval m,'File not found: '+$options[:filepath]
+        retval = self.retval m,"File not found: #{$options[:filepath]}"
         return retval
       end
-      Log.add('Got new file to convert: '+$options[:filepath])
+      Log.add("Got new file to convert: #{$options[:filepath]}")
       m[:stage]+=1
-      self.stage1(m)
+      self.stage1 m
     end
     
     # Converting
@@ -38,7 +37,7 @@ module Stages
       info = Converter.parse $options[:filepath]
       if !info || info[:general][:dur].to_s.empty? || info[:video][:bitrate].to_s.empty?
         m[:retry]+=1
-        retval = self.retval m,'Could not get movide information: '+$options[:filepath]
+        retval = self.retval m,"Could not get movide information: #{$options[:filepath]}"
         return retval
       end
       o = {:res => {}}
@@ -54,7 +53,7 @@ module Stages
         if w.to_f >= v[:w].to_f || h.to_f >= v[:h].to_f
           key = (k.to_s.split('x')[1]+"p").to_sym
 
-          Log.add("-----------"+key.to_s+"-head----------------")
+#          Log.add("-----#{key}-head-----")
 =begin
                 width = (dar*v[:h].to_f).floor
                 width = width.odd? ? width+1 : width
@@ -76,20 +75,19 @@ module Stages
               :targetAudioBitrate => info[:audio][:bitrate] > v[:abitrate] ? v[:abitrate].to_s : info[:audio][:bitrate].to_s
           })
 
-          o[:res][key].each{|k,v| Log.add("#{k}: #{v}")}
-
-          Log.add("----------------bottom----------------")
+ #         Log.add("-----#{key}-bottom-----")
         end
       end
 
       o[:fname] = m['file'].split('.')[0]
       o[:tpath] = "#{$options[:tmpPath]}/#{o[:fname]}/"
       o[:info] = info
+      Log.recursive_add o
 
       %x[/bin/mkdir #{o[:tpath]}]
 
-      Converter.convert! m,o
       Converter.screenshots m,o
+      Converter.convert! m,o
 
       %x[/bin/rm -rf #{o[:tpath]}]
 

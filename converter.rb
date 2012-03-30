@@ -10,6 +10,7 @@ else
   $options[:mode] = :development
 end
 $options[:conf] = o[:conf]
+$options[:token] = rand(36**8).to_s(36)
 require './lib/memq'
 require 'json'
 require 'net/http'
@@ -17,7 +18,7 @@ require 'uri'
 require './lib/helpers'
 require './lib/converter'
 require './lib/stages'
-
+Log.add "=== Start #{$options[:token]} ==="
 Log.add("Running in #{$options[:mode]} mode")
 
 if !ARGV.empty?
@@ -86,7 +87,11 @@ movies.each do |movieString|
     if $options['local']
       p movie
       #p File.basename(File.basename(movieHash["file"],'.failed'),'.*')
+      
+      # Set the response uri
       uri = movie['domain'].blank? ? ($options[:mode] == :development ? URI.parse('http://api.mdtube.lan:3000') : URI.parse('http://api.mdtube.ru')) : "http://#{movie['domain']}"
+      
+      # Because of local mode, ensure that video still exists
       req = Net::HTTP::Get.new('/videos/exists?f='+File.basename(movie["file"],'.*'))
       http = Net::HTTP.new uri.host, uri.port                                                                                                                                                                                                                                                                  
       response = http.start do |http|
