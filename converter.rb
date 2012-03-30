@@ -81,7 +81,7 @@ else
 
     movies = (mem.dequeue q, (mem.total q)).values
 end
-p movies
+#p movies
 movies.each do |movieString|
     movie = JSON.parse movieString
     if $options['local']
@@ -106,6 +106,7 @@ movies.each do |movieString|
     end
     movie[:stage] = 0 if !movie[:stage]
     movie[:retry] = 0 if !movie[:retry]
+    p movie
 
     result = case movie[:stage]
       when 0 then Stages.stage0 movie
