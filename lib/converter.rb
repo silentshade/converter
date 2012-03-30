@@ -46,8 +46,9 @@ module Converter
     end
     
     def self.convert!(m,o)
+      request = Response.prepare m
       o[:res].each do |k,v|
-        resDir = o[:tpath]+k.to_s+'/'
+        resDir = "#{o[:tpath]}#{k}/"
         outfile = $options[:outBasePath]+'video/'+k.to_s+'/'+o[:fname]+'.mp4'
         result = []
         %x[mkdir #{resDir}]
@@ -70,7 +71,8 @@ module Converter
           #p cmd 
           result.push self.execute(cmd)
         end
-        Log.recursive_add result
+        Log.add "#{k} command summary: #{result.join(', ')}"
+
         if result.all?
           info = Converter.parse outfile
           o[:res][k][:success] = true
@@ -101,11 +103,8 @@ module Converter
           p postdata
           #if (!$options['local'])
             #uri = URI.parse('http://'+m['domain']+m['respond_to'])
-            uri = m['domain'].blank? ? URI.parse('http://api.mdtube.ru/uploads') : URI.parse('http://'+m['domain']+m['respond_to'])
-            http = Net::HTTP.new uri.host, uri.port
-            request = Net::HTTP::Post.new uri.request_uri
             request.set_form_data(:success => 'true', :data => postdata)
-            response = http.request(request)
+            response = Response.send request
             #if response.code == "404"
             #  Log.add("File #{o[:fname]} not in database. Moving to 404")
             #  %x[mv #{$options[:filepath]} #{$options[:filepath]}.404]
@@ -116,14 +115,14 @@ module Converter
           #p response.body
         else
           Log.add("File #{o[:fname]} convertion to #{k} failed.")
-          o[:res][k][:success] = false
+          o[:res][k][:success] = false          
         end
       end
       if !o[:res].map{|k,v| v[:success]}.any?
-        Log.add "Moving #{o[:fname]} to '.failed' as no convertion succeded"
-        %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
+        #Log.add "Moving #{o[:fname]} to '.failed' as no convertion succeded"
+        #%x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
       end
-      o
+      return o
     end
     
     def self.screenshots(m,o)
@@ -156,7 +155,7 @@ module Converter
       cmds.each do |cmd|
         result.push self.execute(cmd)
       end
-      Log.add "Result: #{result}"
-      return m
+      Log.add "Screenshots command summary: #{result.join(', ')}"
+      return result
     end
 end

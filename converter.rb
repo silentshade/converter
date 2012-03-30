@@ -112,6 +112,10 @@ movies.each do |movieString|
       when 1 then Stages.stage1 movie
       when 2 then Stages.stage2 movie
       when 3 then Stages.stage3 movie
+      when 4 then Stages.stage3 movie
+    end
+    if !result.nil?
+      mem.enqueue q, result
     end
     #p result
 end
