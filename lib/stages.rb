@@ -1,13 +1,13 @@
 module Stages
     def self.retval(m,msg = 'Unknown error')
-      Log.add "Stage #{m[:stage]} result:"
+      Log.add "--- Stage #{m[:stage]} result:"
       if !$options['local']
         if m[:retry] <= $options[:maxRetries]
           Log.add "#{msg}. Sending back to queue, retry count: #{m[:retry]}."
           return m
         else
           Log.add "#{msg}. Maximum retry count #{$options[:maxRetries]} exceeded."
-          Log.add "Moving #{o[:fname]} to '.failed' as no convertion succeded"
+          Log.add "Moving #{m[:opts][:fname]} to '.failed' as no convertion succeded"
           %x[mv #{m[:filepath]} #{m[:filepath]}.failed]
           Log.add "Sending"
           postdata = {
@@ -28,6 +28,7 @@ module Stages
     
     # Getting file
     def self.stage0(m)
+      Log.add "--- Starting Stage 0:"
 
       if m[:path]
         m[:filepath] = m[:path]
@@ -49,7 +50,8 @@ module Stages
     end
 
     # Calculating options
-    def self.stage1(m) 
+    def self.stage1(m)
+      Log.add "--- Starting Stage 1:"
       info = Converter.parse m[:filepath]
       if !info || info[:general][:dur].to_s.empty? || info[:video][:bitrate].to_s.empty?
         m[:retry]+=1
@@ -106,6 +108,8 @@ module Stages
 
     # Making screenshots  
     def self.stage2(m)
+      Log.add "--- Starting Stage 2:"
+
       o = m[:opts]
       %x[/bin/mkdir #{o[:tpath]}]
       res = Converter.screenshots m,o
@@ -122,6 +126,8 @@ module Stages
 
     # Converting video
     def self.stage3(m)
+      Log.add "--- Starting Stage 3:"
+
       o = m[:opts]
       %x[/bin/mkdir #{o[:tpath]}]
       m[:opts] = Converter.convert! m,o
@@ -142,6 +148,8 @@ module Stages
 
   # Response    
     def self.stage4(m)
+      Log.add "--- Starting Stage 4:"
+
       cmd = 'mv '+m[:filepath]+' '+$options[:outBasePath]+'video/orig/'+m[:file]+' 2>&1'
       Log.add "Dummy move here.."
       #Converter.execute(cmd)

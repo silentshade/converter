@@ -46,12 +46,6 @@ module Converter
         outfile = $options[:outBasePath]+'video/'+k.to_s+'/'+o[:fname]+'.mp4'
         result = []
         %x[mkdir #{resDir}]
-        puts "--- Debug ---"
-        puts o
-        puts v
-        puts $options
-        puts resDir
-        puts "-- End Debug --"
         cmds = [
           'mencoder -af volnorm=2 -oac faac -faacopts br='+v[:targetAudioBitrate]+ \
           ':mpeg=4:object=2 -channels 2 -srate '+v[:srate].to_s+' -ovc x264 -x264encopts bitrate='+v[:bitrate]+':'+v[:x264encopts]+ \
