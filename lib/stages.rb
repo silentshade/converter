@@ -11,7 +11,7 @@ module Stages
           %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
           Log.add "Sending"
           postdata = {
-            :id => m['id']
+            :id => m['id'],
             :filename => m[:opts][:fname],
           }.to_json
           request = Response.prepare m
