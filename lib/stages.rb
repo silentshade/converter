@@ -1,9 +1,9 @@
 module Stages
     def self.retval(m,msg = 'Unknown error')
-      Log.add "Stage #{m[:stage]} result:"
+      Log.add "Stage #{m['stage']} result:"
       if !$options['local']
-        if m[:retry] <= $options[:maxRetries]
-          Log.add "#{msg}. Sending back to queue, retry count: #{m[:retry]}."
+        if m['retry'] <= $options[:maxRetries]
+          Log.add "#{msg}. Sending back to queue, retry count: #{m['retry']}."
           return m
         else
           Log.add "#{msg}. Maximum retry count #{$options[:maxRetries]} exceeded."
@@ -39,12 +39,12 @@ module Stages
       $options[:filepath] += m['file']
 
       if !File.file?($options[:filepath])
-        m[:retry]+=1
+        m['retry']+=1
         retval = self.retval m,"File not found: #{$options[:filepath]}"
         return retval
       end
       Log.add("Got new file to convert: #{$options[:filepath]}")
-      m[:stage]+=1
+      m["stage"]+=1
       self.stage1 m
     end
 
@@ -52,7 +52,7 @@ module Stages
     def self.stage1(m) 
       info = Converter.parse $options[:filepath]
       if !info || info[:general][:dur].to_s.empty? || info[:video][:bitrate].to_s.empty?
-        m[:retry]+=1
+        m['retry']+=1
         retval = self.retval m,"Could not get movide information: #{$options[:filepath]}"
         return retval
       end
@@ -100,7 +100,7 @@ module Stages
 
       m[:opts] = o
 
-      m[:stage]+=1
+      m["stage"]+=1
       self.stage2 m
     end
 
@@ -111,9 +111,9 @@ module Stages
       res = Converter.screenshots m,o
       %x[/bin/rm -rf #{o[:tpath]}]
       if res.any?
-        m[:stage]+=1
+        m["stage"]+=1
       else
-        m[:retry]+=1
+        m['retry']+=1
         retval = self.retval m,"Could not create screenshots for #{o[:fname]}"
         return retval        
       end
@@ -127,13 +127,13 @@ module Stages
       m[:opts] = Converter.convert! m,o
       %x[/bin/rm -rf #{o[:tpath]}]
       if m[:opts][:res].map{|k,v| v[:success]}.all?
-        m[:stage]+=1
+        m["stage"]+=1
       elsif m[:opts][:res].map{|k,v| v[:success]}.any?
-        m[:retry]+=1
+        m['retry']+=1
         retval = self.retval m,"Could not convert #{o[:fname]} at least to one of target resolutions"
         return retval
       else
-        m[:retry]+=1
+        m['retry']+=1
         retval = self.retval m,"Could not convert #{o[:fname]} to any of target resolutions"
         return retval
       end

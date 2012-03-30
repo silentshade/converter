@@ -104,14 +104,11 @@ movies.each do |movieString|
       end
       p response.body    
     end
-    p movie
-    p "Stage before: #{movie[:stage]}"
 
-    movie[:stage] = 0 if !movie[:stage]
-    movie[:retry] = 0 if !movie[:retry]
-    p "Stage is: #{movie[:stage]}"
+    movie["stage"] = 0 if !movie["stage"]
+    movie["retry"] = 0 if !movie["retry"]
 
-    result = case movie[:stage]
+    result = case movie["stage"]
       when 0 then Stages.stage0 movie
       when 1 then Stages.stage1 movie
       when 2 then Stages.stage2 movie
