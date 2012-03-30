@@ -77,7 +77,7 @@ module Converter
           info = Converter.parse outfile
           o[:res][k][:success] = true
           postdata = {
-            :id => m['id'],
+            :id => m[:id],
             :filename => o[:fname],
             :duration => info[:general][:dur],
             :formats => {
@@ -102,7 +102,7 @@ module Converter
           }.to_json
           p postdata
           #if (!$options['local'])
-            #uri = URI.parse('http://'+m['domain']+m['respond_to'])
+            #uri = URI.parse('http://'+m[:domain]+m[:respond_to])
             request.set_form_data(:success => 'true', :data => postdata)
             response = Response.send request
             #if response.code == "404"

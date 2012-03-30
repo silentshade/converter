@@ -32,7 +32,7 @@ end
 module Response
 
   def self.prepare(m)
-    uri = m['domain'].blank? ? URI.parse('http://api.mdtube.ru/uploads') : URI.parse('http://'+m['domain']+m['respond_to'])
+    uri = m[:domain].blank? ? URI.parse('http://api.mdtube.ru/uploads') : URI.parse('http://'+m[:domain]+m[:respond_to])
     @http = Net::HTTP.new uri.host, uri.port
     request = Net::HTTP::Post.new uri.request_uri
   end

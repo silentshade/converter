@@ -1,9 +1,9 @@
 module Stages
     def self.retval(m,msg = 'Unknown error')
-      Log.add "Stage #{m['stage']} result:"
+      Log.add "Stage #{m[:stage]} result:"
       if !$options['local']
-        if m['retry'] <= $options[:maxRetries]
-          Log.add "#{msg}. Sending back to queue, retry count: #{m['retry']}."
+        if m[:retry] <= $options[:maxRetries]
+          Log.add "#{msg}. Sending back to queue, retry count: #{m[:retry]}."
           return m
         else
           Log.add "#{msg}. Maximum retry count #{$options[:maxRetries]} exceeded."
@@ -11,7 +11,7 @@ module Stages
           %x[mv #{$options[:filepath]} #{$options[:filepath]}.failed]
           Log.add "Sending"
           postdata = {
-            :id => m['id'],
+            :id => m[:id],
             :filename => m[:opts][:fname],
           }.to_json
           request = Response.prepare m
@@ -29,22 +29,22 @@ module Stages
     # Getting file
     def self.stage0(m)
 
-      if m['path']
-        $options[:filepath] = m['path']
-      elsif m['action'].to_i == 2
+      if m[:path]
+        $options[:filepath] = m[:path]
+      elsif m[:action].to_i == 2
         $options[:filepath] = $options[:origVideo]
       else
         $options[:filepath] = $options[:uploadPath]
       end
-      $options[:filepath] += m['file']
+      $options[:filepath] += m[:file]
 
       if !File.file?($options[:filepath])
-        m['retry']+=1
+        m[:retry]+=1
         retval = self.retval m,"File not found: #{$options[:filepath]}"
         return retval
       end
       Log.add("Got new file to convert: #{$options[:filepath]}")
-      m["stage"]+=1
+      m[:stage]+=1
       self.stage1 m
     end
 
@@ -52,7 +52,7 @@ module Stages
     def self.stage1(m) 
       info = Converter.parse $options[:filepath]
       if !info || info[:general][:dur].to_s.empty? || info[:video][:bitrate].to_s.empty?
-        m['retry']+=1
+        m[:retry]+=1
         retval = self.retval m,"Could not get movide information: #{$options[:filepath]}"
         return retval
       end
@@ -93,14 +93,14 @@ module Stages
         end
       end
 
-      o[:fname] = m['file'].split('.')[0]
+      o[:fname] = m[:file].split('.')[0]
       o[:tpath] = "#{$options[:tmpPath]}/#{o[:fname]}/"
       o[:info] = info
       Log.recursive_add o
 
       m[:opts] = o
 
-      m["stage"]+=1
+      m[:stage]+=1
       self.stage2 m
     end
 
@@ -111,9 +111,9 @@ module Stages
       res = Converter.screenshots m,o
       %x[/bin/rm -rf #{o[:tpath]}]
       if res.any?
-        m["stage"]+=1
+        m[:stage]+=1
       else
-        m['retry']+=1
+        m[:retry]+=1
         retval = self.retval m,"Could not create screenshots for #{o[:fname]}"
         return retval        
       end
@@ -127,13 +127,13 @@ module Stages
       m[:opts] = Converter.convert! m,o
       %x[/bin/rm -rf #{o[:tpath]}]
       if m[:opts][:res].map{|k,v| v[:success]}.all?
-        m["stage"]+=1
+        m[:stage]+=1
       elsif m[:opts][:res].map{|k,v| v[:success]}.any?
-        m['retry']+=1
+        m[:retry]+=1
         retval = self.retval m,"Could not convert #{o[:fname]} at least to one of target resolutions"
         return retval
       else
-        m['retry']+=1
+        m[:retry]+=1
         retval = self.retval m,"Could not convert #{o[:fname]} to any of target resolutions"
         return retval
       end
@@ -142,7 +142,7 @@ module Stages
 
   # Response    
     def self.stage4(m)
-      cmd = 'mv '+$options[:filepath]+' '+$options[:outBasePath]+'video/orig/'+m['file']+' 2>&1'
+      cmd = 'mv '+$options[:filepath]+' '+$options[:outBasePath]+'video/orig/'+m[:file]+' 2>&1'
       Log.add "Dummy move here.."
       #Converter.execute(cmd)
     end

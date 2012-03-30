@@ -84,31 +84,33 @@ end
 #p movies
 movies.each do |movieString|
     movie = JSON.parse movieString
+    movie.recursive_symbolize_keys!
+
     if $options['local']
       p movie
       #p File.basename(File.basename(movieHash["file"],'.failed'),'.*')
       
       # Set the response uri
-      uri = movie['domain'].blank? ? ($options[:mode] == :development ? URI.parse('http://api.mdtube.lan:3000') : URI.parse('http://api.mdtube.ru')) : "http://#{movie['domain']}"
+      uri = movie[:domain].blank? ? ($options[:mode] == :development ? URI.parse('http://api.mdtube.lan:3000') : URI.parse('http://api.mdtube.ru')) : "http://#{movie[:domain]}"
       
       # Because of local mode, ensure that video still exists
-      req = Net::HTTP::Get.new('/videos/exists?f='+File.basename(movie["file"],'.*'))
+      req = Net::HTTP::Get.new('/videos/exists?f='+File.basename(movie[:file],'.*'))
       http = Net::HTTP.new uri.host, uri.port                                                                                                                                                                                                                                                                  
       response = http.start do |http|
         http.request(req)
       end
       if response.code == "404"
-        Log.add("File #{movie['file']} not in database. Moving to 404")                                                                                                                                                                                                                                                  
-        %x[mv #{movie['path']}#{movie['file']} #{movie['path']}#{movie['file']}.404]
+        Log.add("File #{movie[:file]} not in database. Moving to 404")                                                                                                                                                                                                                                                  
+        %x[mv #{movie['path']}#{movie[:file]} #{movie[:path]}#{movie[:file]}.404]
         next    
       end
       p response.body    
     end
 
-    movie["stage"] = 0 if !movie["stage"]
-    movie["retry"] = 0 if !movie["retry"]
+    movie[:stage] = 0 if !movie[:stage]
+    movie[:retry] = 0 if !movie[:retry]
 
-    result = case movie["stage"]
+    result = case movie[:stage]
       when 0 then Stages.stage0 movie
       when 1 then Stages.stage1 movie
       when 2 then Stages.stage2 movie
