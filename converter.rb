@@ -1,5 +1,6 @@
 HM = '/srv/www/converter/htdocs/converter'
 require 'yaml'
+require 'memq'
 require './lib/core_ext'
 o = YAML.load_file('./config/config.yml')
 if %x[hostname].chomp == "dl1.mdtube.ru" 
@@ -11,7 +12,7 @@ else
 end
 $options[:conf] = o[:conf]
 $options[:token] = rand(36**8).to_s(36)
-require './lib/memq'
+#require './lib/memq'
 require 'json'
 require 'net/http'
 require 'uri'
@@ -40,7 +41,7 @@ if !ARGV.empty?
       Log.add("File count: #{d.count - 2}")
       if $args[:time]
         Log.add("'Time' argument passed, searching for files starting at #{$args[:time]} modify time")
-        entries = d.collect{|f| f if File.ctime($args[:f]+f) >= DateTime.strptime($args[:time],"%Y-%m-%d %H:%M:%S").to_time}
+        entries = d.collect{|f| p "CTime: #{File.ctime($args[:f]+f)}"; p DateTime.strptime($args[:time],"%Y-%m-%d %H:%M:%S").to_time; f if File.ctime($args[:f]+f) >= DateTime.strptime($args[:time],"%Y-%m-%d %H:%M:%S").to_time}
       elsif $args[:start]
         Log.add("'Start' argument passed, searching for file with name #{$args[:start]}")
         s = d.sort
@@ -51,6 +52,7 @@ if !ARGV.empty?
           entries = s.entries.values_at(i..-1)
         end
       end
+      p entries
       entries = entries.compact
       p entries
       entries.each do |f|
@@ -72,14 +74,14 @@ if !ARGV.empty?
     end
     $options['local'] = true
 else 
-    mem = MEMQ.new
+    mem = Memq::Queue.new 'converter'
     q = $options[:queueName]
-    if mem.isEmpty? q
+    if mem.empty?
       Log.add 'Queue is empty, exiting'
       exit
     end
 
-    movies = (mem.dequeue q, (mem.total q)).values
+    movies = (mem.dequeue mem.total).values
 end
 #p movies
 movies.each do |movieString|
@@ -118,7 +120,7 @@ movies.each do |movieString|
       when 4 then Stages.stage3 movie
     end
     if !result.nil? && !$options['local']
-      mem.enqueue q, result.to_json
+      mem.enqueue result.to_json
     end
     #p result
 end
